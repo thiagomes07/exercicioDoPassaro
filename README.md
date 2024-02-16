@@ -1,2 +1,5 @@
-# exercicioDoPassaro
-Simple Game Exercise with Phaser
+## 🌐 Demonstration
+
+<p align="center">
+    <img src="assets/demonstration.gif">
+</p>
