@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="assets/iconDragon.ico"
+      type="image/x-icon"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <title>Exercício do Pássaro</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #2c3e50, #633079);
+      }
+
+      div#dragonGame {
+        box-shadow: 0 0 15px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dragonGame"></div>
+    <script>
+      var config = {
+        type: Phaser.AUTO,
+        width: 1000,
+        height: 600,
+        parent: "dragonGame",
+        scene: {
+          preload: preload,
+          create: create,
+          update: update,
+        },
+      };
+
+      var game = new Phaser.Game(config);
+
+      // Variáveis para receber os diferentes spritesheet
+      var dragon;
+
+      var velocityX = 7;
+      var velocityY = 4;
+
+      const spriteNames = [ // Nomes dos sprites para serem iterados e carregados
+        "dragonSideRed",
+        "dragonSideBlue",
+        "dragonSideGreen",
+        "dragonTopRed",
+        "dragonTopBlue",
+        "dragonTopGreen",
+      ];
+      
+      // Função para carregar os assets a serem usados no jogo
+      function preload() {
+        this.load.image("bg", "assets/background.jpg"); // Carrega background
+
+        // Laço for para carregar as spritesheets
+        for (let i = 0; i < spriteNames.length; i++) {
+          const spriteName = spriteNames[i];
+
+          this.load.spritesheet(spriteName, `assets/${spriteName}.png`, {
+            frameWidth: 191,
+            frameHeight: 121,
+          });
+        }
+      }
+
+      // Função na qual você coloca elementos que serão criados, isso vai de elementos estéticos até elemenos físicos invisíveis
+      function create() {
+        this.add.image(500, 300, "bg"); // Cria o plano de fundo
+        dragon = this.add.sprite(100, 100, "dragonSideRed").setScale(1.1);
+
+        this.anims.create({
+          key: "fly", // Nome da animação
+          frames: this.anims.generateFrameNumbers("dragonSideRed", {
+            start: 0,
+            end: 2,
+          }),
+          frameRate: 8, //  Quantidade de troca de imagem por segundo
+          repeat: -1, // loop infinito
+        });
+
+        dragon.anims.play("fly", true); // Faz a animação "fly", criada acima, rodar
+      }
+
+      function update() {
+        // Função execução cíclica, ideal para algoritmos que necessitam ser executados múltiplas vezes por segundo, como é o caso de capturar eventos de clique nas teclas
+
+        // Movimento no eixo x
+        if (dragon.x < 100 || dragon.x > 900) {
+          velocityX *= -1;
+          changeSpriteSheet(this); // Troca spritesheet
+        } // Detecta se o dragão está dentro dos limites do mapa, caso ultrapasse, inverte a direção horizontal
+
+        dragon.x += velocityX; // Movimenta o dragão no eixo x
+
+        // Movimento no eixo y
+        if (dragon.y < 100 || dragon.y > 535) {
+          velocityY *= -1;
+          changeSpriteSheet(this);
+        } // Detecta se o dragão está dentro dos limites do mapa, caso ultrapasse, inverte a direção vertical
+
+        dragon.y += velocityY; // Movimenta o dragão no eixo y
+
+        // Espelhamento da imagem de acordo com a direção do dragão no eixo x
+        dragon.setFlip(velocityX > 0 ? false : true, false);
+      }
+
+      // Função para trocar o spritesheet para um aleatório entre os disponíveis
+      function changeSpriteSheet(context) {
+        var randomIndex = Phaser.Math.Between(0, 5); // Gera um número aleatório entre 0 e 5
+        var spriteSheetArray = [
+          "dragonSideBlue",
+          "dragonSideGreen",
+          "dragonSideRed",
+          "dragonTopBlue",
+          "dragonTopGreen",
+          "dragonTopRed",
+        ]; // Array com os nomes dos spritesheets disponíveis
+        var newSpriteSheet = spriteSheetArray[randomIndex]; // Sprint que substituirá o atual
+
+        dragon.setTexture(newSpriteSheet); // Define um novo spritesheet aleatório para o dragão
+
+        dragon.anims.play("fly", false); // Para a animação atual
+        dragon.anims.remove("fly"); // Remove a animação atual
+        dragon.anims.create({
+          // Cria animação com o spritesheet atual
+          key: "fly",
+          frames: context.anims.generateFrameNumbers(newSpriteSheet, {
+            start: 0,
+            end: 2,
+          }),
+          frameRate: 8,
+          repeat: -1,
+        });
+        dragon.anims.play("fly", true); // Inicia a nova animação
+      }
+    </script>
+  </body>
+</html>
